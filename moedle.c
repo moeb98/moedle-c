@@ -3,10 +3,7 @@
 #include <Windows.h>
 #endif
 
-// Die folgenden Zeilen laden Header-Dateien, die Zugriff auf Funktionen
-// etwa für die Ein- und Ausgabe, zur Zufallszahlenerzeugung oder zur
-// Stringverarbeitung bereitstellen oder Typen und Werte für den Umgang
-// mit Boole'schen Werten definieren
+// load std header files for I/O, string and bool operations etc.
 #include <ctype.h>       // tolower()
 #include <stdbool.h>     // bool, true und false
 #include <stdio.h>       // stdin, getchar(), fgets()
@@ -14,16 +11,16 @@
 #include <string.h>      // strncmp(), strchr()
 #include <time.h>        // time()
 
-// Definition zur Wortliste in der Datei words.c einbinden
+// include word list
 #include "words.h"
 
 #define WORD_BUF_LEN (WORD_LENGTH + 1)
 #define MAX_TRIES (6)
 
-// Bei der Auswertung des geratenen Wortes wird jeder Buchstabe markiert:
-// `NOT_PRESENT` steht für einen Buchstaben, der nicht im gesuchten Wort
-// vorkommt, `PRESENT` für einen Buchstaben, der vorkommt, aber fehl-
-// platziert ist, `CORRECT` für einen richtig platzierten Buchstaben.
+// each letter of the entered word will be marked correspondingly:
+// `NOT_PRESENT` - letter is not present in the word we look for
+// `PRESENT` - letter is present but in the wrong position
+// `CORRECT` - letter is at the correct position
 enum status
 {
     UNMARKED,     // 0
@@ -34,30 +31,25 @@ enum status
 
 typedef enum status state_t;
 
-// Diese Struktur hält den aktuellen Zustand der Raterunde fest
+// this struct contains current state of our round in the game
 typedef struct
 {
-    // Zeiger auf das gesuchte Wort in der Wortliste
+    // pointer to our target word in the word list
     const char* word;
-    // das aktuell geratene Wort
+    // currently entered word
     char guess[WORD_BUF_LEN];
-    // Markierungen für die Richtigkeit der geratenen Buchstaben
+    // marks for the letters and corresponding positions
     state_t result[WORD_LENGTH];
-    // Markierung ob ein Buchstabe aus dem Wort bereits benutzt wurde
+    // mark whether a letter has already been used
     bool used[WORD_LENGTH];
-    // Nummer des Rateversuchs
+    // number of trial
     int n_tries;
 } game_state;
 
-// Prüft, ob das übergebene Wort in der geladenen Wortliste
-// enthalten ist
+// checks whether entered word exists in the word list
 bool word_is_allowed(const char* word)
 {
-    // Sequenzielle Suche nach dem Wort in der Liste
-    // der erlaubten Wörter. Im Kontext dieses Spielchens
-    // ist das völlig okay, performanter wäre aber eine
-    // binäre Suche ("divide & conquer"), zumal die Wortliste
-    // bereits lexikografisch sortiert ist.
+    // sequential search for the word in the list
     for (int i = 0; words[i] != NULL; ++i)
     {
         if (strncmp(word, words[i], WORD_LENGTH) == 0)
@@ -66,9 +58,8 @@ bool word_is_allowed(const char* word)
     return false;
 }
 
-// Das gesuchte Wort nach einem Zeichen des geratenen Wortes durchsuchen,
-// wenn das gesuchte Zeichen noch nicht als benutzt markiert wurde, dieses
-// markieren und true zurückgeben
+// check whether letter of the trial word exists in the target word
+// and, if so, mark correspondingly returning true (false otherwise)
 bool is_character_unmarked(game_state* state, char c)
 {
     for (int i = 0; i < WORD_LENGTH; ++i)
@@ -204,8 +195,8 @@ int main(int argc, char* argv[])
         ? (unsigned int)atoi(argv[1])
         : (unsigned int)time(NULL);
     srand(seed);
-    printf("\nNERD WORD\n\n"
-           "Errate das Wort mit %d Buchstaben in maximal %d Versuchen.\n"
+    printf("\nMOEDLE - a wordle clone\n\n"
+           "Try to find the work with %d letters in maximum %d attempts.\n"
            "(Abbrechen mit Strg+C bzw. Ctrl+C)\n",
            WORD_LENGTH, MAX_TRIES);
 
@@ -240,20 +231,20 @@ int main(int argc, char* argv[])
             // hat der User das Spiel gewonnen
             if (strncmp(state.guess, state.word, WORD_LENGTH) == 0)
             {
-                printf("\nHurra, Du hast das Wort im %d. Versuch gefunden!\n",
+                printf("\nCongrats, you got the word with your %d. attempt!\n",
                        state.n_tries);
                 doRestart = true;
                 keepRunning = another_round();
             }
             else if (state.n_tries == MAX_TRIES)
             {
-                printf("\nSchade, Du hast das Wort nicht erraten.\n"
-                       "Es lautete: %s.\n",
+                printf("\nGame over!!!\n"
+                       "The word we looked for is: %s.\n",
                        state.word);
                 keepRunning = another_round();
             }
         }
     }
-    printf("\nDanke, es war schön mit dir :-)\n\n");
+    printf("\nBye ...\n\n");
     return EXIT_SUCCESS;
 }
