@@ -109,7 +109,7 @@ void get_input(game_state* state)
     bool bad_word;
     do
     {
-        printf("\n%d. Versuch: ", state->n_tries);
+        printf("\nAttempt %d: ", state->n_tries);
         // Eingabe lesen
         bad_word = false;
         for (int i = 0; i < WORD_LENGTH; i++) {
@@ -130,11 +130,11 @@ void get_input(game_state* state)
         printf("Eingabe: '%s'\n", state->guess);
 #endif
         if (bad_word) {
-            printf("Bitte %d Buchstaben eingeben.\n", WORD_LENGTH);
+            printf("Please enter %d letters.\n", WORD_LENGTH);
 	} else {
 	    bad_word = !word_is_allowed(state->guess);
 	    if (bad_word)
-		    printf("Das Wort ist nicht in der Liste erlaubter Wörter.\n");
+		    printf("This word is not in our word list.\n");
 	}
 
     }
@@ -176,15 +176,15 @@ void print_result(const game_state* state)
 
 bool another_round(void)
 {
-    printf("Noch eine Runde? (J/n) ");
+    printf("Wanna play another round? (Y/n) ");
     char answer = (char)tolower(getchar());
     // überflüssige Zeichen verwerfen
     if (answer != '\n')
         while (getchar() != '\n')
             ;
-    bool yes = answer == 'j' || answer == '\n';
+    bool yes = answer == 'y' || answer == '\n';
     if (yes)
-        printf("\nSuper! Dann mal los ...\n");
+        printf("\nAlright! Let's go ...\n");
     return yes;
 }
 
@@ -197,7 +197,7 @@ int main(int argc, char* argv[])
     srand(seed);
     printf("\nMOEDLE - a wordle clone\n\n"
            "Try to find the work with %d letters in maximum %d attempts.\n"
-           "(Abbrechen mit Strg+C bzw. Ctrl+C)\n",
+           "(Cancel with Ctrl+C)\n",
            WORD_LENGTH, MAX_TRIES);
 
     bool keepRunning = true;
@@ -231,7 +231,7 @@ int main(int argc, char* argv[])
             // hat der User das Spiel gewonnen
             if (strncmp(state.guess, state.word, WORD_LENGTH) == 0)
             {
-                printf("\nCongrats, you got the word with your %d. attempt!\n",
+                printf("\nCongrats, you got the word in %d. attempts!\n",
                        state.n_tries);
                 doRestart = true;
                 keepRunning = another_round();
